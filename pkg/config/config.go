@@ -242,6 +242,11 @@ func deprecatedSchema070a() {
 func importBlueprint(blueprintFilename string) (Blueprint, error) {
 	var blueprint Blueprint
 
+	err := checkBlueprintName(blueprintFilename)
+	if err != nil {
+		return blueprint, err
+	}
+
 	reader, err := os.Open(blueprintFilename)
 	if err != nil {
 		return blueprint, fmt.Errorf("%s, filename=%s: %v",
@@ -566,6 +571,15 @@ func (err *DeploymentNameError) Error() string {
 	return fmt.Sprintf("deployment_name must be a string and cannot be empty, cause: %v", err.cause)
 }
 
+// BlueprintNameError signifies a problem with the blueprint name.
+type BlueprintNameError struct {
+	cause string
+}
+
+func (err *BlueprintNameError) Error() string {
+	return fmt.Sprintf("blueprint_name must be a string and cannot be empty, cause: %v", err.cause)
+}
+
 // ResolveGlobalVariables will resolve literal variables "((var.*))" in the
 // provided map to their corresponding value in the global variables of the
 // Blueprint.
@@ -577,7 +591,7 @@ func (b Blueprint) ResolveGlobalVariables(ctyVars map[string]cty.Value) error {
 	return ResolveVariables(ctyVars, origin)
 }
 
-// DeploymentName returns the deployment_name from the config and does approperate checks.
+// DeploymentName returns the deployment_name from the config and does appropriate checks.
 func (b *Blueprint) DeploymentName() (string, error) {
 	nameInterface, found := b.Vars["deployment_name"]
 	if !found {
@@ -593,4 +607,39 @@ func (b *Blueprint) DeploymentName() (string, error) {
 		return "", &DeploymentNameError{"deployment_name was an empty string."}
 	}
 	return deploymentName, nil
+}
+
+// checkBlueprintName verifies that the blueprint has a valid name
+func checkBlueprintName(blueprintFilename string) error {
+	var blueprintMap map[string]interface{}
+
+	reader, err := os.Open(blueprintFilename)
+	if err != nil {
+		return fmt.Errorf("%s, filename=%s: %v",
+			errorMessages["fileLoadError"], blueprintFilename, err)
+	}
+
+	decoder := yaml.NewDecoder(reader)
+	decoder.KnownFields(true)
+
+	err = decoder.Decode(&blueprintMap)
+	if err != nil {
+		return err
+	}
+
+	nameInterface, found := blueprintMap["blueprint_name"]
+	if !found {
+		return &BlueprintNameError{"blueprint_name variable not defined."}
+	}
+
+	blueprintName, ok := nameInterface.(string)
+	if !ok {
+		return &BlueprintNameError{"blueprint_name was not of type string."}
+	}
+
+	if len(blueprintName) == 0 {
+		return &BlueprintNameError{"blueprint_name was an empty string."}
+	}
+
+	return nil
 }
