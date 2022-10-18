@@ -80,6 +80,21 @@ deployment_groups:
       max_node_count: 200
       partition_name: compute
 
+  - id: gpu_partition
+    source: community/modules/compute/SchedMD-slurm-on-gcp-partition
+    use:
+    - network1
+    - homefs
+    - scratchfs
+    - projectsfs
+    settings:
+      partition_name: gpu
+      max_node_count: 200
+      enable_placement: false
+      machine_type: n1-standard-16
+      gpu_type: nvidia-tesla-t4
+      gpu_count: 1
+
   - id: slurm_controller
     source: community/modules/scheduler/SchedMD-slurm-on-gcp-controller
     use:
@@ -89,6 +104,7 @@ deployment_groups:
     - projectsfs
     - low_cost_partition  # low cost partition will be default as it is listed first
     - compute_partition
+    - gpu_partition
     settings:
       controller_machine_type: c2-standard-8
       suspend_time: 60

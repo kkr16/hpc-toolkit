@@ -28,6 +28,42 @@ The following code snippet creates a partition module with:
     node_count_dynamic_max: 200
     machine_type: c2-standard-30
 ```
+### Examples with GPU enabled Compute Partitions
+
+The following code snippet creates a partition module with:
+
+* a max node count of 200
+* VM machine type of `a2-highgpu-1g`
+* partition name of "gpu"
+* connected to the `network1` module via `use`
+* Mounted to homefs via `use`
+* One NVIDIA A100 GPUs
+
+```yaml
+  - id: gpu_partition
+    source: community/modules/compute/schedmd-slurm-gcp-v5-partition
+    use:
+    - network1
+    - homefs
+    settings:
+      partition_name: gpu
+      enable_placement: false
+      on_host_maintenance: TERMINATE
+      node_count_dynamic_max: 200
+      machine_type: a2-highgpu-1g
+      gpu:
+        count: 1
+        type: nvidia-tesla-a100
+```
+
+> **_NOTE:_** You must use the accelerator-optimized (A2) machine type to run NVIDIA A100 GPUs.
+> Each A2 machine type has a fixed GPU count, vCPU count, and memory size.  
+> For example for machine type `a2-highgpu-4g` with 4x NVIDIA A100 40GB GPUs, `gpu_type` must be 
+> set to `nvidia-tesla-a100` and `gpu_count` must be set to `4`.  
+> For NVIDIA A100 80GB GPUs, use machine types `a2-ultragpu-*`.
+
+See the Google Compute Engine [GPU Platforms](https://cloud.google.com/compute/docs/gpus) 
+documentation for the complete, up-to-date list of valid values for `gpu_type` and `gpu_count`.
 
 For a complete example using this module, see
 [slurm-gcp-v5-cluster.yaml](../../../examples/slurm-gcp-v5-cluster.yaml).

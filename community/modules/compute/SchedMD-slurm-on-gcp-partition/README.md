@@ -27,6 +27,38 @@ The following code snippet creates a partition module with:
     machine_type: c2-standard-30
 ```
 
+### Examples with GPU enabled Compute Partitions
+
+The following code snippet creates a partition module with:
+
+* a max node count of 200
+* VM machine type of `n1-standard-16`
+* partition name of "gpu"
+* connected to the `network1` module via `use`
+* Mounted to homefs via `use`
+* Two NVIDIA Tesla T4 GPUs
+
+```yaml
+- id: gpu_partition
+  source: community/modules/compute/SchedMD-slurm-on-gcp-partition
+  use: [network1, homefs]
+  settings:
+    partition_name: gpu
+    max_node_count: 200
+    enable_placement: false
+    machine_type: n1-standard-16
+    gpu_type: nvidia-tesla-t4
+    gpu_count: 2
+```
+> **_NOTE:_** You must use the accelerator-optimized (A2) machine type to run NVIDIA A100 GPUs.
+> Each A2 machine type has a fixed GPU count, vCPU count, and memory size.  
+> For example for machine type `a2-highgpu-4g` with 4x NVIDIA A100 40GB GPUs, `gpu_type` must be 
+> set to `nvidia-tesla-a100` and `gpu_count` must be set to `4`.  
+> For NVIDIA A100 80GB GPUs, use machine types `a2-ultragpu-*`.
+
+See the Google Compute Engine [GPU Platforms](https://cloud.google.com/compute/docs/gpus) 
+documentation for the complete, up-to-date list of valid values for `gpu_type` and `gpu_count`.
+
 ## Support
 The HPC Toolkit team maintains the wrapper around the [slurm-on-gcp] terraform
 modules. For support with the underlying modules, see the instructions in the
