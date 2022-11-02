@@ -22,13 +22,13 @@ require (
 
 require (
 	cloud.google.com/go/serviceusage v1.3.0
-	github.com/googleapis/gax-go/v2 v2.6.0
-	google.golang.org/api v0.101.0
+	github.com/googleapis/gax-go/v2 v2.7.0
+	google.golang.org/api v0.102.0
 )
 
 require (
 	cloud.google.com/go v0.104.0 // indirect
-	cloud.google.com/go/compute/metadata v0.1.0 // indirect
+	cloud.google.com/go/compute/metadata v0.2.1 // indirect
 	cloud.google.com/go/iam v0.3.0 // indirect
 	github.com/agext/levenshtein v1.2.2 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
